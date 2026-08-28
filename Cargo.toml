@@ -1,0 +1,30 @@
+# Schema: https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package]
+name = "reexport"
+version = "2.0.0-pre"
+authors = ["Chris Barrick <cbarrick1@gmail.com>"]
+edition = "2015"  # To maximize compatibility with old versions of Rust.
+description = "A simple macro to declare modules and re-export their contents."
+keywords = ["reexport", "modules", "macro", "re-export"]
+categories = ["rust-patterns", "no-std::no-alloc"]
+readme = "README.md"
+documentation = "https://docs.rs/reexport"
+homepage = "https://github.com/cbarrick/reexport"
+repository = "https://github.com/cbarrick/reexport"
+license = "MIT"
+exclude = [".github/", ".gitignore"]
+
+[lib]
+name = "reexport"
+doctest = false
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[dev-dependencies.macrotest]
+version = "1.2.1"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
