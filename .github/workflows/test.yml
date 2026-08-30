@@ -1,0 +1,39 @@
+name: Test
+
+on:
+  push:
+  pull_request:
+  release: { types: [created] }
+  workflow_dispatch:
+
+permissions: {}
+
+env:
+  RUSTFLAGS: -Dwarnings
+  RUSTDOCFLAGS: -Dwarnings
+  CARGO_TERM_COLOR: always
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        rust: [stable, nightly]
+        features: ["", default]
+        include: [{ rust: nightly, features: all }]
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: "clippy,rustfmt"
+
+      - run: cargo fmt --verbose --check --all
+      - run: cargo check --verbose --keep-going --no-default-features --features=${{ matrix.features }}
+      - run: cargo clippy --no-deps --verbose --keep-going --no-default-features --features=${{ matrix.features }}
+      - run: cargo doc --verbose --keep-going --no-default-features --features=${{ matrix.features }}
+      - run: cargo install cargo-expand # Required for macrotest
+      - run: cargo test --verbose --no-default-features --features=${{ matrix.features }}
