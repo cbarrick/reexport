@@ -22,6 +22,10 @@ doctest = false
 [lints.rust]
 unsafe_code = "forbid"
 
+[features]
+default = []
+all = []
+
 [dev-dependencies.macrotest]
 version = "1.2.1"
 
