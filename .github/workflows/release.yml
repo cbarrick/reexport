@@ -1,0 +1,50 @@
+name: Release to Github
+
+on:
+  push: { tags: ["v[0-9]*.[0-9]*.[0-9]*"] } # Glob matches semver, including pre-releases.
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  attestations: write
+  artifact-metadata: write
+  contents: write
+
+env:
+  RUSTFLAGS: -Dwarnings
+  RUSTDOCFLAGS: -Dwarnings
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Package
+        run: cargo package --workspace
+
+      - name: Attest
+        uses: actions/attest@v4
+        with:
+          subject-path: target/package/*.crate
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: crate
+          path: target/package/*.crate
+          if-no-files-found: error
+
+      - name: Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: target/package/*.crate
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+          draft: true
