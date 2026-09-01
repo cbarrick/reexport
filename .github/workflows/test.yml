@@ -20,8 +20,8 @@ jobs:
     strategy:
       matrix:
         rust: [stable, nightly]
-        features: ["", default]
-        include: [{ rust: nightly, features: all }]
+        features: [--no-default-features, --features=default, --all-features]
+        exclude: [{ rust: stable, features: --all-features }]
 
     steps:
       - uses: actions/checkout@v7
@@ -31,9 +31,24 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: "clippy,rustfmt"
 
+      # Get the current date, used as the cache key.
+      - id: cache-key
+        run: echo "key=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
+
+      # Get cargo-expand from the cache.
+      - uses: actions/cache@v6
+        id: cache
+        with:
+          path: ~/.cargo/bin/*
+          key: test-${{ runner.os }}-${{ steps.cache-key.outputs.key }}
+
+      # Install cargo-expand on cache miss. Required for macrotest.
+      - run: cargo install cargo-expand
+        if: steps.cache.outputs.cache-hit != 'true'
+
+      # Run the actual tests.
       - run: cargo fmt --verbose --check --all
-      - run: cargo check --verbose --keep-going --no-default-features --features=${{ matrix.features }}
-      - run: cargo clippy --no-deps --verbose --keep-going --no-default-features --features=${{ matrix.features }}
-      - run: cargo doc --verbose --keep-going --no-default-features --features=${{ matrix.features }}
-      - run: cargo install cargo-expand # Required for macrotest
-      - run: cargo test --verbose --no-default-features --features=${{ matrix.features }}
+      - run: cargo check --verbose --keep-going ${{ matrix.features }}
+      - run: cargo clippy --no-deps --verbose --keep-going ${{ matrix.features }}
+      - run: cargo doc --verbose --keep-going ${{ matrix.features }}
+      - run: cargo test --verbose ${{ matrix.features }}
