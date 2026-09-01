@@ -20,12 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-// The doc comment is inherited from the README and doctests are disabled.
-// The examples in the README are untestable as written, and we want proper
-// syntax highlighting in the README. This prevents us from marking the code
-// blocks as `ignore` without breaking syntax highlighting elsewhere.
-// (Doctests are disabled in Cargo.toml.)
-#![doc = include_str!("../README.md")]
+//! # `reexport::modules!`
+//!
+//! A simple macro to declare modules and re-export their contents.
+//!
+//!
+//! ## Quick Start
+//!
+//! Provide the macro with some number of module declarations:
+//!
+//! ```rust
+//! reexport::modules! {
+//!     mod foo;  // A private module.
+//!     pub mod bar;  // A public module.
+//!
+//!     #[cfg(feature = "baz")]
+//!     mod baz;  // A module with an attribute.
+//! }
+//! ```
+//!
+//! And the macro will expand into something like this:
+//!
+//! ```rust,skipfmt
+//! // Modules are declared as written in the macro.
+//! // Then the contents of the module is re-exported with `pub use`.
+//! mod foo;
+//! pub use self::foo::*;
+//!
+//! // Module declarations may include a visibility specifier.
+//! pub mod bar;
+//! pub use self::bar::*;
+//!
+//! // If the original declaration contained any attributes,
+//! // they are applied to both the `mod` statement and the `use` statement.
+//! #[cfg(feature = "baz")] mod baz;
+//! #[cfg(feature = "baz")] pub use self::baz::*;
+//! ```
+
 #![no_std]
 
 /// A simple macro to declare modules and re-export their contents.

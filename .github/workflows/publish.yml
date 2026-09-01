@@ -1,0 +1,52 @@
+name: Publish to crates.io
+
+on:
+  release: { types: [published] }
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Required for OIDC token exchange
+
+env:
+  RUSTFLAGS: -Dwarnings
+  RUSTDOCFLAGS: -Dwarnings
+  CARGO_TERM_COLOR: always
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: crates.io
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@nightly
+
+      - name: Authenticate with crates.io
+        uses: rust-lang/crates-io-auth-action@v1
+        id: auth
+
+      - name: Publish to crates.io
+        run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ steps.auth.outputs.token }}
+
+      # We could stop here.
+      # The published crate _should_ be byte-for-byte identical to the one
+      # created in the release workflow, assuming the same OS and Cargo version.
+      # But just in case they differ, let's generate a new attestation and
+      # upload the crate for debugging.
+
+      - name: Attest
+        uses: actions/attest@v4
+        with:
+          subject-path: target/package/*.crate
+
+      - name: Upload
+        uses: actions/upload-artifact@v7
+        with:
+          name: crate
+          path: target/package/*.crate
+          if-no-files-found: error
