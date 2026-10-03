@@ -2,7 +2,7 @@
 
 [package]
 name = "reexport"
-version = "2.0.0-rc1"
+version = "2.0.0-rc2"
 authors = ["Chris Barrick <cbarrick1@gmail.com>"]
 edition = "2015"  # To maximize compatibility with old versions of Rust.
 description = "A simple macro to declare modules and re-export their contents."
