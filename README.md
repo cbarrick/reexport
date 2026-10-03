@@ -76,7 +76,7 @@ was packaged from the public source at the corresponding tag using the following
 command:
 
 ```shell
-$ curl https://crates.io/api/v1/crates/reexport/2.0.0/download \
+$ curl -L https://crates.io/api/v1/crates/reexport/2.0.0/download \
 | gh attestation verify /dev/stdin --repo cbarrick/reexport --source-ref refs/tags/v2.0.0
 ```
 
