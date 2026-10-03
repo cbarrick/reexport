@@ -38,15 +38,18 @@ jobs:
       # created in the release workflow, assuming the same OS and Cargo version.
       # But just in case they differ, let's generate a new attestation and
       # upload the crate for debugging.
+      #
+      # The crate built by `cargo publish` is at:
+      #     target/package/tmp-crate/reexport-${VERSION}.crate
 
       - name: Attest
         uses: actions/attest@v4
         with:
-          subject-path: target/package/*.crate
+          subject-path: target/package/*/*.crate
 
       - name: Upload
         uses: actions/upload-artifact@v7
         with:
           name: crate
-          path: target/package/*.crate
+          path: target/package/*/*.crate
           if-no-files-found: error
